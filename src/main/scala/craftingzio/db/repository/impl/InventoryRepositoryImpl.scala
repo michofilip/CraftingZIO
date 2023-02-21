@@ -25,42 +25,50 @@ case class InventoryRepositoryImpl(override protected val dataSource: DataSource
 
     override def save(inventoryEntity: InventoryEntity, inventoryStackEntities: Seq[InventoryStackEntity]): Task[Int] =
         if inventoryEntity.id == 0 then
-            transaction {
-                for
-                    inventoryId <- run(insert(lift(inventoryEntity)))
-                    inventoryStackEntities <- ZIO.succeed(inventoryStackEntities).map(_.map(_.copy(inventoryId = inventoryId)))
-                    _ <- run(insertAllStacks(inventoryStackEntities))
-                yield inventoryId
-            }
+            insertWithStacks(inventoryEntity, inventoryStackEntities)
         else
-            transaction {
-                for
-                    inventoryId <- run(update(lift(inventoryEntity)))
-                    _ <- run(deleteAllStacks(lift(inventoryId)))
-                    _ <- run(insertAllStacks(inventoryStackEntities))
-                yield inventoryId
-            }
+            updateWithStacks(inventoryEntity, inventoryStackEntities)
 
     override def delete(id: Int): Task[Unit] = transaction {
         for
-            _ <- run(deleteAllStacks(lift(id)))
-            _ <- run(query[InventoryEntity].filter(i => i.id == lift(id)).delete)
+            _ <- run(deleteStacks(lift(id)))
+            _ <- run(deleteInventory(lift(id)))
         yield ()
     }
 
-    private inline def insert = quote { (inventoryEntity: InventoryEntity) =>
+    private def insertWithStacks(inventoryEntity: InventoryEntity, inventoryStackEntities: Seq[InventoryStackEntity]) = transaction {
+        for
+            inventoryId <- run(insertInventory(lift(inventoryEntity)))
+            inventoryStackEntitiesUpdated = inventoryStackEntities.map(_.copy(inventoryId = inventoryId))
+            _ <- run(insertStacks(inventoryStackEntitiesUpdated))
+        yield inventoryId
+    }
+
+    private def updateWithStacks(inventoryEntity: InventoryEntity, inventoryStackEntities: Seq[InventoryStackEntity]) = transaction {
+        for
+            inventoryId <- run(updateInventory(lift(inventoryEntity)))
+            _ <- run(deleteStacks(lift(inventoryId)))
+            _ <- run(insertStacks(inventoryStackEntities))
+        yield inventoryId
+    }
+
+    private inline def insertInventory = quote { (inventoryEntity: InventoryEntity) =>
         query[InventoryEntity].insertValue(inventoryEntity).returning(i => i.id)
     }
 
-    private inline def update = quote { (inventoryEntity: InventoryEntity) =>
+    private inline def updateInventory = quote { (inventoryEntity: InventoryEntity) =>
         query[InventoryEntity].filter(i => i.id == inventoryEntity.id).updateValue(inventoryEntity).returning(i => i.id)
     }
 
-    private inline def insertAllStacks(inventoryStackEntities: Seq[InventoryStackEntity]) = quote {
+    private inline def deleteInventory = quote { (id: Int) =>
+        query[InventoryEntity].filter(i => i.id == id).delete
+    }
+
+    private inline def insertStacks(inventoryStackEntities: Seq[InventoryStackEntity]) = quote {
         liftQuery(inventoryStackEntities).foreach(invs => query[InventoryStackEntity].insertValue(invs))
     }
 
-    private inline def deleteAllStacks = quote { (inventoryId: Int) =>
+    private inline def deleteStacks = quote { (inventoryId: Int) =>
         query[InventoryStackEntity].filter(invs => invs.inventoryId == inventoryId).delete
     }
 

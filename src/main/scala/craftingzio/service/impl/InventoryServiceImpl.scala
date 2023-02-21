@@ -66,12 +66,19 @@ case class InventoryServiceImpl(private val itemRepository: ItemRepository,
         inventories.map(inventoryFrom)
 
     private def validateAllItems(itemIds: Seq[Int]): Task[Unit] = {
-        itemRepository.findAllByIdIn(itemIds).flatMap { itemEntities =>
-            val missingIds = itemIds.toSet -- itemEntities.map(_.id).toSet
-            ZIO.fail(NotFoundException(s"Items id: ${missingIds.mkString(", ")} not found"))
-                .unless(missingIds.isEmpty)
-                .unit
+        val duplicateIds = itemIds.groupMapReduce(identity)(_ => 1)(_ + _).collect {
+            case (id, count) if count > 1 => id
         }
+
+        for
+            _ <- ZIO.fail(NotFoundException(s"Items id: ${duplicateIds.mkString(", ")} are duplicated"))
+                .unless(duplicateIds.isEmpty)
+
+            itemEntities <- itemRepository.findAllByIdIn(itemIds)
+            missingIds = itemIds.toSet -- itemEntities.map(_.id).toSet
+            _ <- ZIO.fail(NotFoundException(s"Items id: ${missingIds.mkString(", ")} not found"))
+                .unless(missingIds.isEmpty)
+        yield ()
     }
 
     private def saveInventoryWithItems(inventoryEntity: InventoryEntity, inventoryForm: InventoryForm): Task[Int] = {
