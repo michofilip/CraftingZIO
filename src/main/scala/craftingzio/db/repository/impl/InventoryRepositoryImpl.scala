@@ -18,14 +18,18 @@ case class InventoryRepositoryImpl(override protected val dataSource: DataSource
         val i = run(query[InventoryEntity])
         val isi = run(query[InventoryStackEntity].join(query[ItemEntity]).on((invs, i) => invs.itemId == i.id))
 
-        (i <&> isi).map(groupFetched)
+        (i <&> isi).map { case (inventories, stacks) =>
+            groupFetched(inventories, stacks)
+        }
     }
 
     override def findById(id: Int): Task[Option[(InventoryEntity, Seq[(InventoryStackEntity, ItemEntity)])]] = {
         val i = run(query[InventoryEntity].filter(i => i.id == lift(id)))
         val isi = run(query[InventoryStackEntity].filter(invs => invs.inventoryId == lift(id)).join(query[ItemEntity]).on((invs, i) => invs.itemId == i.id))
 
-        (i <&> isi).map(groupFetched).map(_.headOption)
+        (i <&> isi).map { case (inventories, stacks) =>
+            groupFetched(inventories, stacks)
+        }.map(_.headOption)
     }
 
     override def save(inventoryEntity: InventoryEntity, inventoryStackEntities: Seq[InventoryStackEntity]): Task[Int] =
@@ -77,8 +81,7 @@ case class InventoryRepositoryImpl(override protected val dataSource: DataSource
         query[InventoryStackEntity].filter(invs => invs.inventoryId == inventoryId).delete
     }
 
-    private def groupFetched(data: (Seq[InventoryEntity], Seq[(InventoryStackEntity, ItemEntity)])) = {
-        val (inventories, stacks) = data
+    private def groupFetched(inventories: Seq[InventoryEntity], stacks: Seq[(InventoryStackEntity, ItemEntity)]) = {
         val stacksByInventoryId = stacks.groupBy { case (stack, _) => stack.inventoryId }
 
         inventories.map { inventory =>
