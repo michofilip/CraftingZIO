@@ -4,7 +4,7 @@ import craftingzio.Main.Environment
 import craftingzio.config.{ApplicationConfig, DbConfig, HttpServerConfig, SLF4JConfig}
 import craftingzio.controller.{InventoryController, ItemController, RecipeController}
 import craftingzio.db.repository.impl.{InventoryRepositoryImpl, ItemRepositoryImpl, RecipeRepositoryImpl}
-import craftingzio.service.impl.{InventoryServiceImpl, ItemServiceImpl, RecipeServiceImpl}
+import craftingzio.service.impl.{InventoryServiceImpl, ItemServiceImpl, RecipeMakerServiceImpl, RecipeServiceImpl}
 import zio.*
 import zio.Console.printLine
 import zio.http.Server
@@ -29,15 +29,20 @@ object Main extends ZIOAppDefault {
             ItemController.layer,
             InventoryController.layer,
             RecipeController.layer,
+
             ItemServiceImpl.layer,
-            ItemRepositoryImpl.layer,
             RecipeRepositoryImpl.layer,
             InventoryServiceImpl.layer,
+            RecipeMakerServiceImpl.layer,
+
+            ItemRepositoryImpl.layer,
             InventoryRepositoryImpl.layer,
             RecipeServiceImpl.layer,
+
             DbConfig.layer,
             ApplicationConfig.layer,
             HttpServerConfig.layer,
+
             ZLayer.Debug.mermaid
         ).exitCode
 }

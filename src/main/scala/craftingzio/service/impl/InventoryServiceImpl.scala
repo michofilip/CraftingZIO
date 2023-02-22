@@ -47,7 +47,7 @@ case class InventoryServiceImpl(private val itemRepository: ItemRepository,
         yield ()
     } @@ Log.timed("InventoryServiceImpl::delete")
 
-    private def getById(id: Int) =
+    override private[service] def getById(id: Int): Task[(InventoryEntity, Seq[(InventoryStackEntity, ItemEntity)])] =
         inventoryRepository.findById(id).flatMap {
             case Some(inventory) => ZIO.succeed(inventory)
             case None => ZIO.fail(NotFoundException(s"Inventory id: $id not found"))

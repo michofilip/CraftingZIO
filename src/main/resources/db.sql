@@ -2,8 +2,8 @@
 DROP TABLE IF EXISTS public.recipe_output;
 DROP TABLE IF EXISTS public.recipe_input;
 DROP TABLE IF EXISTS public.recipe;
-DROP TABLE IF EXISTS public.stack;
 DROP TABLE IF EXISTS public.inventory_stack;
+DROP TABLE IF EXISTS public.inventory;
 DROP TABLE IF EXISTS public.item;
 
 -- Create tables

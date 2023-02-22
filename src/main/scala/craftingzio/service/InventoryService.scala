@@ -1,5 +1,6 @@
 package craftingzio.service
 
+import craftingzio.db.model.{InventoryEntity, InventoryStackEntity, ItemEntity}
 import craftingzio.dto.Inventory
 import craftingzio.form.InventoryForm
 import zio.Task
@@ -14,4 +15,6 @@ trait InventoryService {
     def update(id: Int, inventoryForm: InventoryForm): Task[Inventory]
 
     def delete(id: Int): Task[Unit]
+
+    private[service] def getById(id: Int): Task[(InventoryEntity, Seq[(InventoryStackEntity, ItemEntity)])]
 }
