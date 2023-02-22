@@ -6,7 +6,7 @@ case class RecipeOutputEntity(recipeId: Int, itemId: Int, amount: Int)
 
 object RecipeOutputEntity {
     inline given SchemaMeta[RecipeOutputEntity] = schemaMeta(
-        "inventory_stack",
+        "recipe_output",
         _.recipeId -> "recipe_id",
         _.itemId -> "item_id",
         _.amount -> "amount"

@@ -2,9 +2,9 @@ package craftingzio
 
 import craftingzio.Main.Environment
 import craftingzio.config.{ApplicationConfig, DbConfig, HttpServerConfig, SLF4JConfig}
-import craftingzio.controller.{InventoryController, ItemController}
-import craftingzio.db.repository.impl.{InventoryRepositoryImpl, ItemRepositoryImpl}
-import craftingzio.service.impl.{InventoryServiceImpl, ItemServiceImpl}
+import craftingzio.controller.{InventoryController, ItemController, RecipeController}
+import craftingzio.db.repository.impl.{InventoryRepositoryImpl, ItemRepositoryImpl, RecipeRepositoryImpl}
+import craftingzio.service.impl.{InventoryServiceImpl, ItemServiceImpl, RecipeServiceImpl}
 import zio.*
 import zio.Console.printLine
 import zio.http.Server
@@ -17,7 +17,8 @@ object Main extends ZIOAppDefault {
         _ <- ZIO.logInfo("Welcome to CraftingZIO")
         itemController <- ZIO.service[ItemController]
         inventoryController <- ZIO.service[InventoryController]
-        routes = itemController.routes ++ inventoryController.routes
+        recipeController <- ZIO.service[RecipeController]
+        routes = itemController.routes ++ inventoryController.routes ++ recipeController.routes
         port <- Server.install(routes)
         _ <- ZIO.logInfo(s"Server started at port: $port")
         _ <- ZIO.never
@@ -27,10 +28,13 @@ object Main extends ZIOAppDefault {
         app.provide(
             ItemController.layer,
             InventoryController.layer,
+            RecipeController.layer,
             ItemServiceImpl.layer,
             ItemRepositoryImpl.layer,
+            RecipeRepositoryImpl.layer,
             InventoryServiceImpl.layer,
             InventoryRepositoryImpl.layer,
+            RecipeServiceImpl.layer,
             DbConfig.layer,
             ApplicationConfig.layer,
             HttpServerConfig.layer,

@@ -14,14 +14,19 @@ case class InventoryRepositoryImpl(override protected val dataSource: DataSource
         with InventoryRepository
         with DataSourceAutoProvider {
 
-    override def findAll: Task[Seq[(InventoryEntity, Seq[(InventoryStackEntity, ItemEntity)])]] =
-        run(query[InventoryEntity].fetchItems)
-            .map(groupFetched)
+    override def findAll: Task[Seq[(InventoryEntity, Seq[(InventoryStackEntity, ItemEntity)])]] = {
+        val i = run(query[InventoryEntity])
+        val isi = run(query[InventoryStackEntity].join(query[ItemEntity]).on((invs, i) => invs.itemId == i.id))
 
-    override def findById(id: Int): Task[Option[(InventoryEntity, Seq[(InventoryStackEntity, ItemEntity)])]] =
-        run(query[InventoryEntity].filter(i => i.id == lift(id)).fetchItems)
-            .map(groupFetched)
-            .map(_.headOption)
+        (i <&> isi).map(groupFetched)
+    }
+
+    override def findById(id: Int): Task[Option[(InventoryEntity, Seq[(InventoryStackEntity, ItemEntity)])]] = {
+        val i = run(query[InventoryEntity].filter(i => i.id == lift(id)))
+        val isi = run(query[InventoryStackEntity].filter(invs => invs.inventoryId == lift(id)).join(query[ItemEntity]).on((invs, i) => invs.itemId == i.id))
+
+        (i <&> isi).map(groupFetched).map(_.headOption)
+    }
 
     override def save(inventoryEntity: InventoryEntity, inventoryStackEntities: Seq[InventoryStackEntity]): Task[Int] =
         if inventoryEntity.id == 0 then
@@ -72,18 +77,14 @@ case class InventoryRepositoryImpl(override protected val dataSource: DataSource
         query[InventoryStackEntity].filter(invs => invs.inventoryId == inventoryId).delete
     }
 
-    extension (inventoryQuery: EntityQuery[InventoryEntity]) {
-        private inline def fetchItems: Query[(InventoryEntity, Option[(InventoryStackEntity, ItemEntity)])] = quote {
-            inventoryQuery.leftJoin(
-                query[InventoryStackEntity]
-                    .join(query[ItemEntity])
-                    .on((invs, i) => invs.itemId == i.id)
-            ).on({ case (inv, (invs, _)) => inv.id == invs.inventoryId })
+    private def groupFetched(data: (Seq[InventoryEntity], Seq[(InventoryStackEntity, ItemEntity)])) = {
+        val (inventories, stacks) = data
+        val stacksByInventoryId = stacks.groupBy { case (stack, _) => stack.inventoryId }
+
+        inventories.map { inventory =>
+            (inventory, stacksByInventoryId.getOrElse(inventory.id, Seq.empty))
         }
     }
-
-    private def groupFetched(data: Seq[(InventoryEntity, Option[(InventoryStackEntity, ItemEntity)])]) =
-        data.groupMap(_._1)(_._2).view.mapValues(_.flatten).toSeq
 
 }
 
