@@ -6,5 +6,5 @@ import zio.Task
 trait RecipeRepository {
     def findAll: Task[Seq[(RecipeEntity, Seq[(RecipeInputEntity, ItemEntity)], Seq[(RecipeOutputEntity, ItemEntity)])]]
 
-    def findById(id: Int): Task[Option[(RecipeEntity, Seq[(RecipeInputEntity, ItemEntity)], Seq[(RecipeOutputEntity, ItemEntity)])]]
+    def findById(id: Int): Task[(RecipeEntity, Seq[(RecipeInputEntity, ItemEntity)], Seq[(RecipeOutputEntity, ItemEntity)])]
 }

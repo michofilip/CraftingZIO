@@ -15,14 +15,8 @@ case class RecipeServiceImpl(private val recipeRepository: RecipeRepository)
     } @@ Log.timed("RecipeServiceImpl::findAll")
 
     override def findById(id: Int): Task[Recipe] = {
-        getById(id).map(recipeFrom)
+        recipeRepository.findById(id).map(recipeFrom)
     } @@ Log.timed("RecipeServiceImpl::findById")
-
-    override private[service] def getById(id: Int): Task[(RecipeEntity, Seq[(RecipeInputEntity, ItemEntity)], Seq[(RecipeOutputEntity, ItemEntity)])] =
-        recipeRepository.findById(id).flatMap {
-            case Some(recipe) => ZIO.succeed(recipe)
-            case None => ZIO.fail(NotFoundException(s"Recipe id: $id not found"))
-        }
 
     private def recipeFrom(recipe: (RecipeEntity, Seq[(RecipeInputEntity, ItemEntity)], Seq[(RecipeOutputEntity, ItemEntity)])): Recipe = {
         val (recipeEntity, inputs, outputs) = recipe

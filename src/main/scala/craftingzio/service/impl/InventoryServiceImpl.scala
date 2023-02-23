@@ -18,7 +18,7 @@ case class InventoryServiceImpl(private val itemRepository: ItemRepository,
     } @@ Log.timed("InventoryServiceImpl::findAll")
 
     override def findById(id: Int): Task[Inventory] = {
-        getById(id).map(inventoryFrom)
+        inventoryRepository.findById(id).map(inventoryFrom)
     } @@ Log.timed("InventoryServiceImpl::findById")
 
     override def create(inventoryForm: InventoryForm): Task[Inventory] = {
@@ -32,7 +32,7 @@ case class InventoryServiceImpl(private val itemRepository: ItemRepository,
 
     override def update(id: Int, inventoryForm: InventoryForm): Task[Inventory] = {
         for
-            inventoryEntity <- getById(id).map(_._1)
+            inventoryEntity <- inventoryRepository.findById(id).map(_._1)
             _ <- validateAllItems(inventoryForm.stacks.map(_.itemId))
             _ <- saveInventoryWithItems(inventoryEntity, inventoryForm)
             inventory <- findById(id)
@@ -42,16 +42,10 @@ case class InventoryServiceImpl(private val itemRepository: ItemRepository,
 
     override def delete(id: Int): Task[Unit] = {
         for
-            _ <- getById(id).map(_._1)
+            _ <- inventoryRepository.findById(id).map(_._1)
             _ <- inventoryRepository.delete(id)
         yield ()
     } @@ Log.timed("InventoryServiceImpl::delete")
-
-    override private[service] def getById(id: Int): Task[(InventoryEntity, Seq[(InventoryStackEntity, ItemEntity)])] =
-        inventoryRepository.findById(id).flatMap {
-            case Some(inventory) => ZIO.succeed(inventory)
-            case None => ZIO.fail(NotFoundException(s"Inventory id: $id not found"))
-        }
 
     private def inventoryFrom(inventory: (InventoryEntity, Seq[(InventoryStackEntity, ItemEntity)])): Inventory = {
         val (inventoryEntity, items) = inventory

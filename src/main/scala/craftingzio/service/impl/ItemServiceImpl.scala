@@ -16,13 +16,8 @@ case class ItemServiceImpl(itemRepository: ItemRepository) extends ItemService {
     } @@ Log.timed("ItemServiceImpl::findAll")
 
     override def findById(id: Int): Task[Item] = {
-        getById(id).map(Item.from)
+        itemRepository.findById(id).map(Item.from)
     } @@ Log.timed("ItemServiceImpl::findById")
-
-    private def getById(id: Int): Task[ItemEntity] = itemRepository.findById(id).flatMap {
-        case Some(itemEntity) => ZIO.succeed(itemEntity)
-        case None => ZIO.fail(NotFoundException(s"Item id: $id not found"))
-    }
 }
 
 object ItemServiceImpl {

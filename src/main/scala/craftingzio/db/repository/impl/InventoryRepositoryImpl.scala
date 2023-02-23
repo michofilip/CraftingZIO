@@ -3,6 +3,7 @@ package craftingzio.db.repository.impl
 import craftingzio.db.model.InventoryEntity.given
 import craftingzio.db.model.{InventoryEntity, InventoryStackEntity, ItemEntity}
 import craftingzio.db.repository.{DataSourceAutoProvider, InventoryRepository}
+import craftingzio.exceptions.NotFoundException
 import io.getquill.*
 import zio.{Task, ZIO, ZLayer}
 
@@ -23,13 +24,16 @@ case class InventoryRepositoryImpl(override protected val dataSource: DataSource
         }
     }
 
-    override def findById(id: Int): Task[Option[(InventoryEntity, Seq[(InventoryStackEntity, ItemEntity)])]] = {
+    override def findById(id: Int): Task[(InventoryEntity, Seq[(InventoryStackEntity, ItemEntity)])] = {
         val i = run(query[InventoryEntity].filter(i => i.id == lift(id)))
         val isi = run(query[InventoryStackEntity].filter(invs => invs.inventoryId == lift(id)).join(query[ItemEntity]).on((invs, i) => invs.itemId == i.id))
 
         (i <&> isi).map { case (inventories, stacks) =>
             groupFetched(inventories, stacks)
-        }.map(_.headOption)
+        }.map(_.headOption).flatMap {
+            case Some(inventory) => ZIO.succeed(inventory)
+            case None => ZIO.fail(NotFoundException(s"Inventory id: $id not found"))
+        }
     }
 
     override def save(inventoryEntity: InventoryEntity, inventoryStackEntities: Seq[InventoryStackEntity]): Task[Int] =

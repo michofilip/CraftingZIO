@@ -15,6 +15,4 @@ trait InventoryService {
     def update(id: Int, inventoryForm: InventoryForm): Task[Inventory]
 
     def delete(id: Int): Task[Unit]
-
-    private[service] def getById(id: Int): Task[(InventoryEntity, Seq[(InventoryStackEntity, ItemEntity)])]
 }

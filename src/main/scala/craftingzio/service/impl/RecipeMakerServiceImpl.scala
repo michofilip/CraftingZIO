@@ -1,22 +1,22 @@
 package craftingzio.service.impl
 
 import craftingzio.db.model.{InventoryEntity, InventoryStackEntity, ItemEntity, RecipeEntity, RecipeInputEntity, RecipeOutputEntity}
-import craftingzio.db.repository.InventoryRepository
+import craftingzio.db.repository.{InventoryRepository, RecipeRepository}
 import craftingzio.dto.{Inventory, Recipe}
 import craftingzio.exceptions.ValidationException
 import craftingzio.form.RecipeMakeForm
-import craftingzio.service.{InventoryService, RecipeMakerService, RecipeService}
+import craftingzio.service.{InventoryService, RecipeMakerService}
 import craftingzio.utils.Log
 import zio.{Task, ZIO, ZLayer}
 
-case class RecipeMakerServiceImpl(private val recipeService: RecipeService,
-                                  private val inventoryService: InventoryService,
-                                  private val inventoryRepository: InventoryRepository)
+case class RecipeMakerServiceImpl(private val recipeRepository: RecipeRepository,
+                                  private val inventoryRepository: InventoryRepository,
+                                  private val inventoryService: InventoryService)
     extends RecipeMakerService {
 
     override def makeRecipe(recipeMakeForm: RecipeMakeForm): Task[Inventory] = {
         for
-            inventoryAndRecipe <- inventoryService.getById(recipeMakeForm.inventoryId) <&> recipeService.getById(recipeMakeForm.recipeId)
+            inventoryAndRecipe <- inventoryRepository.findById(recipeMakeForm.inventoryId) <&> recipeRepository.findById(recipeMakeForm.recipeId)
 
             inventoryEntity = inventoryAndRecipe._1
             inventoryStackEntities = inventoryAndRecipe._2.map(_._1)

@@ -8,6 +8,4 @@ trait RecipeService {
     def findAll: Task[Seq[Recipe]]
 
     def findById(id: Int): Task[Recipe]
-
-    private[service] def getById(id: Int): Task[(RecipeEntity, Seq[(RecipeInputEntity, ItemEntity)], Seq[(RecipeOutputEntity, ItemEntity)])]
 }
