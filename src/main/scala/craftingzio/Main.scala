@@ -2,9 +2,9 @@ package craftingzio
 
 import craftingzio.Main.Environment
 import craftingzio.config.{ApplicationConfig, DbConfig, HttpServerConfig, SLF4JConfig}
-import craftingzio.controller.{InventoryController, ItemController, RecipeController}
+import craftingzio.controller.{CraftingController, InventoryController, ItemController, RecipeController}
 import craftingzio.db.repository.impl.{InventoryRepositoryImpl, ItemRepositoryImpl, RecipeRepositoryImpl}
-import craftingzio.service.impl.{InventoryServiceImpl, ItemServiceImpl, RecipeMakerServiceImpl, RecipeServiceImpl}
+import craftingzio.service.impl.{CraftingServiceImpl, InventoryServiceImpl, ItemServiceImpl, RecipeServiceImpl}
 import zio.*
 import zio.Console.printLine
 import zio.http.Server
@@ -15,12 +15,17 @@ object Main extends ZIOAppDefault {
 
     private val app = for
         _ <- ZIO.logInfo("Welcome to CraftingZIO")
+
         itemController <- ZIO.service[ItemController]
         inventoryController <- ZIO.service[InventoryController]
         recipeController <- ZIO.service[RecipeController]
-        routes = itemController.routes ++ inventoryController.routes ++ recipeController.routes
+        craftingController <- ZIO.service[CraftingController]
+
+        routes = itemController.routes ++ inventoryController.routes ++ recipeController.routes ++ craftingController.routes
+
         port <- Server.install(routes)
         _ <- ZIO.logInfo(s"Server started at port: $port")
+
         _ <- ZIO.never
     yield ()
 
@@ -29,11 +34,12 @@ object Main extends ZIOAppDefault {
             ItemController.layer,
             InventoryController.layer,
             RecipeController.layer,
+            CraftingController.layer,
 
             ItemServiceImpl.layer,
             RecipeRepositoryImpl.layer,
             InventoryServiceImpl.layer,
-            RecipeMakerServiceImpl.layer,
+            CraftingServiceImpl.layer,
 
             ItemRepositoryImpl.layer,
             InventoryRepositoryImpl.layer,

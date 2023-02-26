@@ -10,9 +10,7 @@ import zio.{Task, ZIO, ZLayer}
 
 case class ItemServiceImpl(itemRepository: ItemRepository) extends ItemService {
     override def findAll: Task[Seq[Item]] = {
-        for
-            items <- itemRepository.findAll
-        yield items.map(Item.from)
+        itemRepository.findAll.map(_.map(Item.from))
     } @@ Log.timed("ItemServiceImpl::findAll")
 
     override def findById(id: Int): Task[Item] = {
