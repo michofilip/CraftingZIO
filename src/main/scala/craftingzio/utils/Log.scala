@@ -14,7 +14,7 @@ object Log {
                     _ <- ZIO.logInfo(s"$label succeeded after ${duration.toMillis} milliseconds")
                 yield a
             }.tapSomeError {
-                case e: RuntimeException =>
+                case e: Throwable =>
                     ZIO.logError(s"$label failed with message: ${e.getMessage}")
             }
         }

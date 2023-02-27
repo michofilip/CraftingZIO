@@ -1,6 +1,6 @@
 package craftingzio.service.impl
 
-import craftingzio.db.model.{InventoryEntity, InventoryStackEntity, ItemEntity, RecipeEntity, RecipeInputEntity, RecipeOutputEntity}
+import craftingzio.db.model.*
 import craftingzio.db.repository.{InventoryRepository, RecipeRepository}
 import craftingzio.dto.{CheckRecipe, Inventory, Recipe}
 import craftingzio.exceptions.ValidationException
@@ -39,7 +39,7 @@ case class CraftingServiceImpl(private val recipeRepository: RecipeRepository,
             recipeInputEntities = inventoryAndRecipe._3._2.map(_._1)
 
             checkRecipe <- validateRecipe(inventoryStackEntities, recipeInputEntities, craftingForm.amount).foldZIO({
-                case e: ValidationException => ZIO.succeed(CheckRecipe.no(e.getMessage))
+                case e: ValidationException => ZIO.succeed(CheckRecipe.no.withMessage(e.getMessage))
                 case e => ZIO.fail(e)
             }, _ => ZIO.succeed(CheckRecipe.yes))
 

@@ -41,10 +41,7 @@ case class InventoryServiceImpl(private val itemRepository: ItemRepository,
 
 
     override def delete(id: Int): Task[Unit] = {
-        for
-            _ <- inventoryRepository.findById(id).map(_._1)
-            _ <- inventoryRepository.delete(id)
-        yield ()
+        inventoryRepository.findById(id) *> inventoryRepository.delete(id)
     } @@ Log.timed("InventoryServiceImpl::delete")
 
     private def inventoryFrom(inventory: (InventoryEntity, Seq[(InventoryStackEntity, ItemEntity)])): Inventory = {
