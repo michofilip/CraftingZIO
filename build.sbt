@@ -11,7 +11,7 @@ val zioLoggingVersion = "2.1.9"
 val zioConfigVersion = "3.0.7"
 val postgresqlVersion = "42.5.4"
 val slf4jVersion = "2.0.5"
-val flywayVersion = "9.15.0"
+val flywayVersion = "9.15.1"
 
 lazy val root = (project in file("."))
     .settings(
@@ -34,7 +34,7 @@ lazy val root = (project in file("."))
 
             "io.getquill" %% "quill-jdbc-zio" % quillVersion,
             "org.postgresql" % "postgresql" % postgresqlVersion,
-//            "org.flywaydb" % "flyway-core" % flywayVersion,
+            "org.flywaydb" % "flyway-core" % flywayVersion,
 
             "dev.zio" %% "zio-test" % zioVersion % Test,
             "dev.zio" %% "zio-test-sbt" % zioVersion % Test,

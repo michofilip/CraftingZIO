@@ -4,7 +4,9 @@ import craftingzio.Main.Environment
 import craftingzio.config.*
 import craftingzio.controller.{CraftingController, InventoryController, ItemController, RecipeController}
 import craftingzio.db.repository.impl.{InventoryRepositoryImpl, ItemRepositoryImpl, RecipeRepositoryImpl}
-import craftingzio.service.impl.{CraftingServiceImpl, InventoryServiceImpl, ItemServiceImpl, RecipeServiceImpl}
+import craftingzio.service.FlywayService
+import craftingzio.service.impl.*
+import org.flywaydb.core.Flyway
 import zio.*
 import zio.http.Server
 
@@ -13,8 +15,7 @@ object Main extends ZIOAppDefault {
     override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] = SLF4JConfig.layer
 
     private val app = for
-    //        _ <- ZIO.attemptUnsafe(_ => flyway())
-    //        _ <- FlywayService.run
+        _ <- FlywayService.run
         _ <- ZIO.logInfo("Welcome to CraftingZIO")
 
         itemController <- ZIO.service[ItemController]
@@ -30,20 +31,7 @@ object Main extends ZIOAppDefault {
         _ <- ZIO.never
     yield ()
 
-    //    def flyway(): Unit = {
-    //        val flyway = Flyway.configure().dataSource(
-    //            "jdbc:postgresql://localhost:5432/crafting_db?verifyServerCertificate=false&useSSL=false",
-    //            "postgres",
-    //            "postgres"
-    //        )
-    //            .locations("filesystem:src/main/resources/database/migrations")
-    //            .load()
-    //
-    //        flyway.migrate()
-    //    }
-
     override def run: ZIO[Environment & ZIOAppArgs & Scope, Any, Any] =
-    //        Console.printLine("Hello World!")
         app.provide(
             ItemController.layer,
             InventoryController.layer,
@@ -54,7 +42,7 @@ object Main extends ZIOAppDefault {
             RecipeRepositoryImpl.layer,
             InventoryServiceImpl.layer,
             CraftingServiceImpl.layer,
-            //            FlywayService.layer,
+            FlywayServiceImpl.layer,
 
             ItemRepositoryImpl.layer,
             InventoryRepositoryImpl.layer,
