@@ -51,7 +51,7 @@ object Main extends ZIOAppDefault {
             DbConfig.layer,
             ApplicationConfig.layer,
             HttpServerConfig.layer,
-            //            FlywayConfig.layer,
+            FlywayConfig.layer,
 
             ZLayer.Debug.mermaid
         ).exitCode

@@ -9,5 +9,4 @@ case class ApplicationConfig(port: Int)
 
 object ApplicationConfig {
     lazy val layer = ZLayer.fromZIO(Config.fromPrefix[ApplicationConfig]("ApplicationConfig"))
-//        .orDie
 }
