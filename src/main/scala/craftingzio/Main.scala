@@ -1,12 +1,11 @@
 package craftingzio
 
 import craftingzio.Main.Environment
-import craftingzio.config.{ApplicationConfig, DbConfig, HttpServerConfig, SLF4JConfig}
+import craftingzio.config.*
 import craftingzio.controller.{CraftingController, InventoryController, ItemController, RecipeController}
 import craftingzio.db.repository.impl.{InventoryRepositoryImpl, ItemRepositoryImpl, RecipeRepositoryImpl}
 import craftingzio.service.impl.{CraftingServiceImpl, InventoryServiceImpl, ItemServiceImpl, RecipeServiceImpl}
 import zio.*
-import zio.Console.printLine
 import zio.http.Server
 
 object Main extends ZIOAppDefault {
@@ -14,6 +13,8 @@ object Main extends ZIOAppDefault {
     override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] = SLF4JConfig.layer
 
     private val app = for
+    //        _ <- ZIO.attemptUnsafe(_ => flyway())
+    //        _ <- FlywayService.run
         _ <- ZIO.logInfo("Welcome to CraftingZIO")
 
         itemController <- ZIO.service[ItemController]
@@ -29,7 +30,20 @@ object Main extends ZIOAppDefault {
         _ <- ZIO.never
     yield ()
 
+    //    def flyway(): Unit = {
+    //        val flyway = Flyway.configure().dataSource(
+    //            "jdbc:postgresql://localhost:5432/crafting_db?verifyServerCertificate=false&useSSL=false",
+    //            "postgres",
+    //            "postgres"
+    //        )
+    //            .locations("filesystem:src/main/resources/database/migrations")
+    //            .load()
+    //
+    //        flyway.migrate()
+    //    }
+
     override def run: ZIO[Environment & ZIOAppArgs & Scope, Any, Any] =
+    //        Console.printLine("Hello World!")
         app.provide(
             ItemController.layer,
             InventoryController.layer,
@@ -40,6 +54,7 @@ object Main extends ZIOAppDefault {
             RecipeRepositoryImpl.layer,
             InventoryServiceImpl.layer,
             CraftingServiceImpl.layer,
+            //            FlywayService.layer,
 
             ItemRepositoryImpl.layer,
             InventoryRepositoryImpl.layer,
@@ -48,6 +63,7 @@ object Main extends ZIOAppDefault {
             DbConfig.layer,
             ApplicationConfig.layer,
             HttpServerConfig.layer,
+            //            FlywayConfig.layer,
 
             ZLayer.Debug.mermaid
         ).exitCode
