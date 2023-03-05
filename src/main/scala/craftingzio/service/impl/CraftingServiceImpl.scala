@@ -9,10 +9,11 @@ import craftingzio.service.{CraftingService, InventoryService}
 import craftingzio.utils.Log
 import zio.{Task, ZIO, ZLayer}
 
-case class CraftingServiceImpl(private val recipeRepository: RecipeRepository,
-                               private val inventoryRepository: InventoryRepository,
-                               private val inventoryService: InventoryService)
-    extends CraftingService {
+case class CraftingServiceImpl(
+    private val recipeRepository: RecipeRepository,
+    private val inventoryRepository: InventoryRepository,
+    private val inventoryService: InventoryService
+) extends CraftingService {
 
     override def craftRecipe(craftingForm: CraftingForm): Task[Inventory] = {
         for
@@ -46,9 +47,11 @@ case class CraftingServiceImpl(private val recipeRepository: RecipeRepository,
         yield checkRecipe
     } @@ Log.timed("RecipeMakerServiceImpl::checkRecipe")
 
-    private def validateRecipe(inventoryStackEntities: Seq[InventoryStackEntity],
-                               recipeInputEntities: Seq[RecipeInputEntity],
-                               amount: Int): Task[Unit] = {
+    private def validateRecipe(
+        inventoryStackEntities: Seq[InventoryStackEntity],
+        recipeInputEntities: Seq[RecipeInputEntity],
+        amount: Int
+    ): Task[Unit] = {
         val inventory = inventoryStackEntities.map(stack => stack.itemId -> stack.amount).toMap
 
         val requiredItemIds = recipeInputEntities.filter { input =>
@@ -61,11 +64,13 @@ case class CraftingServiceImpl(private val recipeRepository: RecipeRepository,
         ZIO.fail(ValidationException(s"Not enough items id: ${requiredItemIds.mkString(", ")}")).unless(requiredItemIds.isEmpty).unit
     }
 
-    private def craft(inventoryEntity: InventoryEntity,
-                      inventoryStackEntities: Seq[InventoryStackEntity],
-                      recipeInputEntities: Seq[RecipeInputEntity],
-                      recipeOutputEntities: Seq[RecipeOutputEntity],
-                      amount: Int): Task[Unit] = {
+    private def craft(
+        inventoryEntity: InventoryEntity,
+        inventoryStackEntities: Seq[InventoryStackEntity],
+        recipeInputEntities: Seq[RecipeInputEntity],
+        recipeOutputEntities: Seq[RecipeOutputEntity],
+        amount: Int
+    ): Task[Unit] = {
         val inventory = inventoryStackEntities.map(stack => stack.itemId -> stack.amount).toMap
 
         val inventoryStackEntitiesUpdated = Seq(

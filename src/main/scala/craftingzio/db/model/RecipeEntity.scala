@@ -2,7 +2,10 @@ package craftingzio.db.model
 
 import io.getquill.*
 
-case class RecipeEntity(name: String, id: Int = 0)
+case class RecipeEntity(
+    name: String,
+    id: Int = 0
+)
 
 object RecipeEntity {
     inline given SchemaMeta[RecipeEntity] = schemaMeta(

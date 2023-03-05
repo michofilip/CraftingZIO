@@ -4,7 +4,10 @@ import craftingzio.db.model.{InventoryEntity, ItemEntity}
 import org.checkerframework.checker.units.qual.s
 import zio.json.{DeriveJsonCodec, JsonCodec}
 
-case class Inventory(id: Int, name: String, stacks: Seq[InventoryStack])
+case class Inventory(
+    id: Int, name: String,
+    stacks: Seq[InventoryStack]
+)
 
 object Inventory {
     given JsonCodec[Inventory] = DeriveJsonCodec.gen

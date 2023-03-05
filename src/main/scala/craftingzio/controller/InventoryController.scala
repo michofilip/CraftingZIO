@@ -7,8 +7,9 @@ import zio.http.*
 import zio.http.model.{Method, Status}
 import zio.json.*
 
-case class InventoryController(private val inventoryService: InventoryService)
-    extends Controller {
+case class InventoryController(
+    private val inventoryService: InventoryService
+) extends Controller {
 
     def routes = Http.collectZIO[Request] {
         case Method.GET -> !! / "inventories" => inventoryService.findAll.toJsonResponse

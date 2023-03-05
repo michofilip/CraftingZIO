@@ -10,10 +10,11 @@ import zio.{Task, ZIO, ZLayer}
 import java.sql.SQLException
 import javax.sql.DataSource
 
-case class InventoryRepositoryImpl(override protected val dataSource: DataSource)
-    extends PostgresZioJdbcContext(SnakeCase)
-        with InventoryRepository
-        with DataSourceAutoProvider {
+case class InventoryRepositoryImpl(
+    override protected val dataSource: DataSource
+) extends PostgresZioJdbcContext(SnakeCase)
+    with InventoryRepository
+    with DataSourceAutoProvider {
 
     override def findAll: Task[Seq[(InventoryEntity, Seq[(InventoryStackEntity, ItemEntity)])]] = {
         val i = run(query[InventoryEntity])

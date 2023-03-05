@@ -8,7 +8,9 @@ import craftingzio.service.ItemService
 import craftingzio.utils.Log
 import zio.{Task, ZIO, ZLayer}
 
-case class ItemServiceImpl(itemRepository: ItemRepository) extends ItemService {
+case class ItemServiceImpl(
+    private val itemRepository: ItemRepository
+) extends ItemService {
     override def findAll: Task[Seq[Item]] = {
         itemRepository.findAll.map(_.map(Item.from))
     } @@ Log.timed("ItemServiceImpl::findAll")

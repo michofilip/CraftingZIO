@@ -7,8 +7,9 @@ import zio.http.*
 import zio.http.model.{Method, Status}
 import zio.json.*
 
-case class RecipeController(private val recipeService: RecipeService)
-    extends Controller {
+case class RecipeController(
+    private val recipeService: RecipeService
+) extends Controller {
 
     def routes = Http.collectZIO[Request] {
         case Method.GET -> !! / "recipes" => recipeService.findAll.toJsonResponse

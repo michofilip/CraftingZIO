@@ -8,10 +8,11 @@ import zio.*
 
 import javax.sql.DataSource
 
-case class RecipeRepositoryImpl(override protected val dataSource: DataSource)
-    extends PostgresZioJdbcContext(SnakeCase)
-        with RecipeRepository
-        with DataSourceAutoProvider {
+case class RecipeRepositoryImpl(
+    override protected val dataSource: DataSource
+) extends PostgresZioJdbcContext(SnakeCase)
+    with RecipeRepository
+    with DataSourceAutoProvider {
     override def findAll: Task[Seq[(RecipeEntity, Seq[(RecipeInputEntity, ItemEntity)], Seq[(RecipeOutputEntity, ItemEntity)])]] = {
         val r = run(query[RecipeEntity])
         val rii = run(query[RecipeInputEntity].join(query[ItemEntity]).on((r, i) => r.itemId == i.id))

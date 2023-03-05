@@ -2,7 +2,10 @@ package craftingzio.db.model
 
 import io.getquill.*
 
-case class InventoryEntity(name: String, id: Int = 0)
+case class InventoryEntity(
+    name: String,
+    id: Int = 0
+)
 
 object InventoryEntity {
     inline given SchemaMeta[InventoryEntity] = schemaMeta(

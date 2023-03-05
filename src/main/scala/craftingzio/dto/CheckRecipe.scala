@@ -2,7 +2,10 @@ package craftingzio.dto
 
 import zio.json.{DeriveJsonCodec, JsonCodec}
 
-case class CheckRecipe(canCraft: Boolean, message: Option[String]) {
+case class CheckRecipe(
+    canCraft: Boolean,
+    message: Option[String]
+) {
     def withMessage(message: String): CheckRecipe =
         copy(message = Some(message))
 }

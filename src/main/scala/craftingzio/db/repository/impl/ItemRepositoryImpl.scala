@@ -9,10 +9,11 @@ import zio.*
 
 import javax.sql.DataSource
 
-case class ItemRepositoryImpl(override protected val dataSource: DataSource)
-    extends PostgresZioJdbcContext(SnakeCase)
-        with ItemRepository
-        with DataSourceAutoProvider {
+case class ItemRepositoryImpl(
+    override protected val dataSource: DataSource
+) extends PostgresZioJdbcContext(SnakeCase)
+    with ItemRepository
+    with DataSourceAutoProvider {
 
     override def findAll: Task[Seq[ItemEntity]] = run {
         query[ItemEntity]

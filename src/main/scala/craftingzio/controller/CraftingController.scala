@@ -7,8 +7,9 @@ import zio.http.*
 import zio.http.model.{Method, Status}
 import zio.json.*
 
-case class CraftingController(private val craftingService: CraftingService)
-    extends Controller {
+case class CraftingController(
+    private val craftingService: CraftingService
+) extends Controller {
 
     def routes = Http.collectZIO[Request] {
         case request@Method.POST -> !! / "crafting" => request.fromJson[CraftingForm](craftingService.craftRecipe).toJsonResponse

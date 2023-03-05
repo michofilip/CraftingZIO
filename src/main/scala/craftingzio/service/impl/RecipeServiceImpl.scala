@@ -8,8 +8,9 @@ import craftingzio.service.RecipeService
 import craftingzio.utils.Log
 import zio.{Task, ZIO, ZLayer}
 
-case class RecipeServiceImpl(private val recipeRepository: RecipeRepository)
-    extends RecipeService {
+case class RecipeServiceImpl(
+    private val recipeRepository: RecipeRepository
+) extends RecipeService {
     override def findAll: Task[Seq[Recipe]] = {
         recipeRepository.findAll.map(recipesFrom)
     } @@ Log.timed("RecipeServiceImpl::findAll")

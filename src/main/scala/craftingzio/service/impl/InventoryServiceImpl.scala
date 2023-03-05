@@ -9,9 +9,10 @@ import craftingzio.service.InventoryService
 import craftingzio.utils.Log
 import zio.{Task, ZIO, ZLayer}
 
-case class InventoryServiceImpl(private val itemRepository: ItemRepository,
-                                private val inventoryRepository: InventoryRepository)
-    extends InventoryService {
+case class InventoryServiceImpl(
+    private val itemRepository: ItemRepository,
+    private val inventoryRepository: InventoryRepository
+) extends InventoryService {
 
     override def findAll: Task[Seq[Inventory]] = {
         inventoryRepository.findAll.map(inventoriesFrom)
