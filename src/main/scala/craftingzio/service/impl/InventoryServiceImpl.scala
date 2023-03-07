@@ -3,7 +3,7 @@ package craftingzio.service.impl
 import craftingzio.db.model.{InventoryEntity, InventoryStackEntity, ItemEntity}
 import craftingzio.db.repository.{InventoryRepository, ItemRepository}
 import craftingzio.dto.{Inventory, InventoryStack, Item}
-import craftingzio.exceptions.NotFoundException
+import craftingzio.exceptions.{NotFoundException, ValidationException}
 import craftingzio.form.InventoryForm
 import craftingzio.service.InventoryService
 import craftingzio.utils.Log
@@ -24,6 +24,7 @@ case class InventoryServiceImpl(
 
     override def create(inventoryForm: InventoryForm): Task[Inventory] = {
         for
+            inventoryForm <- InventoryForm.validateZIO(inventoryForm)
             inventoryEntity <- ZIO.succeed(InventoryEntity(name = inventoryForm.name))
             _ <- validateAllItems(inventoryForm.stacks.map(_.itemId))
             inventoryId <- saveInventoryWithItems(inventoryEntity, inventoryForm)
@@ -33,6 +34,7 @@ case class InventoryServiceImpl(
 
     override def update(id: Int, inventoryForm: InventoryForm): Task[Inventory] = {
         for
+            inventoryForm <- InventoryForm.validateZIO(inventoryForm)
             inventoryEntity <- inventoryRepository.findById(id).map(_._1)
             _ <- validateAllItems(inventoryForm.stacks.map(_.itemId))
             _ <- saveInventoryWithItems(inventoryEntity, inventoryForm)

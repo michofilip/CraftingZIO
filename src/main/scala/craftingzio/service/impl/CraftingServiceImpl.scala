@@ -17,6 +17,7 @@ case class CraftingServiceImpl(
 
     override def craftRecipe(craftingForm: CraftingForm): Task[Inventory] = {
         for
+            craftingForm <- CraftingForm.validateZIO(craftingForm)
             inventoryAndRecipe <- inventoryRepository.findById(craftingForm.inventoryId) <&> recipeRepository.findById(craftingForm.recipeId)
 
             inventoryEntity = inventoryAndRecipe._1
@@ -34,6 +35,7 @@ case class CraftingServiceImpl(
 
     override def checkRecipe(craftingForm: CraftingForm): Task[CheckRecipe] = {
         for
+            craftingForm <- CraftingForm.validateZIO(craftingForm)
             inventoryAndRecipe <- inventoryRepository.findById(craftingForm.inventoryId) <&> recipeRepository.findById(craftingForm.recipeId)
 
             inventoryStackEntities = inventoryAndRecipe._2.map(_._1)
